@@ -1,16 +1,26 @@
 package com.skillsync.backend.service;
 
+import com.skillsync.backend.DTO.LoginRequest;
 import com.skillsync.backend.entity.User;
 import com.skillsync.backend.repository.UserRepository;
+import com.skillsync.backend.security.JwtUtil;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public User registerUser(User user) {
@@ -19,6 +29,22 @@ public class UserService {
             throw new RuntimeException("Email already registered");
         }
 
+        // Encrypt the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
+    }
+
+    public String loginUser(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
+
+        // Generate and return JWT token
+        return jwtUtil.generateToken(user.getEmail());
     }
 }

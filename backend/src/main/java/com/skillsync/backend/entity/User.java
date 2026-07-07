@@ -12,7 +12,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String fullname;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -30,11 +30,11 @@ public class User {
     }
 
     public String getName() {
-        return name;
+        return fullname;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.fullname = name;
     }
 
     public String getEmail() {

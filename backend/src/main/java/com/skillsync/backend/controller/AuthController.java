@@ -1,6 +1,7 @@
 package com.skillsync.backend.controller;
 
 import com.skillsync.backend.DTO.AuthResponse;
+import com.skillsync.backend.DTO.LoginRequest;
 import com.skillsync.backend.DTO.RegisterRequest;
 import com.skillsync.backend.entity.User;
 import com.skillsync.backend.service.UserService;
@@ -26,6 +27,19 @@ public class AuthController {
 
         userService.registerUser(user);
 
-        return new AuthResponse("User registered successfully!");
+        return new AuthResponse("User registered successfully!", null);
+    }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody LoginRequest request) {
+
+        String token = userService.loginUser(request);
+
+        return new AuthResponse("Login successful!", token);
+    }
+
+    @GetMapping("/profile")
+    public String profile() {
+        return "JWT Authentication Successful!";
     }
 }
