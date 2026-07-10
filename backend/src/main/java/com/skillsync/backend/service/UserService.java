@@ -26,10 +26,9 @@ public class UserService {
     public User registerUser(User user) {
 
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new RuntimeException("Email already exists");
         }
 
-        // Encrypt the password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
@@ -38,13 +37,13 @@ public class UserService {
     public String loginUser(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new BadCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        // Generate and return JWT token
         return jwtUtil.generateToken(user.getEmail());
     }
 }
